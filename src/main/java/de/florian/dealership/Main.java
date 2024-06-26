@@ -36,6 +36,8 @@ public class Main {
                         insert.execute();
                         insert.close();
 
+                        LOGGER.debug("Inserted {} for {}", element.text(), carName);
+
                     }catch(SQLException e){
                         LOGGER.error(e);
                     }
