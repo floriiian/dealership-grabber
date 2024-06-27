@@ -2,7 +2,6 @@ package de.florian.dealership;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -22,7 +21,7 @@ public class Main {
 
         Connection connection = connectToDatabase("postgres", "Creeper008");
 
-        String carName = "Audi";
+        String carName = "Ford";
         Document document = Jsoup.connect("https://www.donedeal.ie/cars?make=" + carName).get();
 
         String data = Objects.requireNonNull(document.getElementById("__NEXT_DATA__")).data();
@@ -40,18 +39,20 @@ public class Main {
 
             int buildYear = Integer.parseInt((carInfos[0].replaceAll("[\",]", "")));
             long carPrice = Long.parseLong((String.valueOf(node.get("price")).replaceAll("[,\"]", "")));
-            if ((Objects.equals(String.valueOf(node.get("price")), "null"))) {
-                continue;
-            }
-            String engineType = carInfos[1].replaceAll("[\",]", "");
-            String carModel = String.valueOf(node.get("header"));
-            String county = String.valueOf(node.get("county"));
-
             int kmDriven = switch (carInfos.length) {
                 case 4 -> Integer.parseInt((carInfos[2] + carInfos[3]).replaceAll("[,\"A-Za-z' ]", ""));
                 case 3 -> Integer.parseInt(carInfos[2].replaceAll("[,\"A-Za-z' ]", ""));
                 default -> 0;
             };
+
+            String engineType = carInfos[1].replaceAll("[\",]", "");
+            String carModel = String.valueOf(node.get("header"));
+            String county = String.valueOf(node.get("county"));
+
+            // Scam
+            if ((Objects.equals(String.valueOf(node.get("price")), "null"))) {
+                continue;
+            }
 
             try {
                 PreparedStatement insert = connection.prepareStatement("INSERT INTO car_prices (car_model,build_year,engine_type,km_driven,car_price,county,timestamp) VALUES (?, ?, ?, ?, ?, ?, ?) ");
@@ -65,12 +66,13 @@ public class Main {
 
                 insert.execute();
                 insert.close();
-                LOGGER.debug("Successfully inserted.");
 
             } catch (SQLException e) {
                 LOGGER.error(e);
             }
         }
+
+        LOGGER.debug("Successfully inserted all statements.");
         connection.close();
     }
 
