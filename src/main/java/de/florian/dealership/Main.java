@@ -55,7 +55,16 @@ public class Main {
             }
 
             try {
-                PreparedStatement insert = connection.prepareStatement("INSERT INTO car_prices (car_model,build_year,engine_type,km_driven,car_price,county,timestamp) VALUES (?, ?, ?, ?, ?, ?, ?) ");
+                PreparedStatement insert = connection.prepareStatement(
+                    "INSERT INTO car_prices (car_model," +
+                            "build_year," +
+                            "engine_type," +
+                            "km_driven," +
+                            "car_price," +
+                            "county," +
+                            "timestamp)"
+                            + " VALUES (?, ?, ?, ?, ?, ?, ?) "
+                );
                 insert.setString(1, carModel);
                 insert.setInt(2, buildYear);
                 insert.setString(3, engineType);
@@ -94,7 +103,9 @@ public class Main {
                 LOGGER.debug("Database already exists. Skipping.");
             }
 
-            connection = DriverManager.getConnection("jdbc:postgresql://localhost:5432/dealership_prices", username, password);
+            connection = DriverManager.getConnection(
+                    "jdbc:postgresql://localhost:5432/dealership_prices", username, password
+            );
 
             try (Statement statement = connection.createStatement())
             {
