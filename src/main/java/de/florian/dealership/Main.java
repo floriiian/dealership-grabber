@@ -52,14 +52,12 @@ public class Main {
 
             switch(carInfos.length){
                 case 4:
-                    kmDriven = Integer.parseInt(carInfos[2].replaceAll("[,\"A-Za-z' ]", ""));
+                    kmDriven = Integer.parseInt((carInfos[2] + carInfos[3]).replaceAll("[,\"A-Za-z' ]", ""));
                 case 3:
                     kmDriven = Integer.parseInt(carInfos[2].replaceAll("[,\"A-Za-z' ]", ""));
                 case 2:
-                    kmDriven = Integer.parseInt(carInfos[1].replaceAll("[,\"A-Za-z' ]", ""));
+                    kmDriven = Integer.parseInt(carInfos[2].replaceAll("[,\"A-Za-z' ]", ""));
             }
-
-            LOGGER.info("Lenght: {} Var: {}", carInfos.length, kmDriven );
 
             try {
                 PreparedStatement insert = connection.prepareStatement("INSERT INTO car_prices (car_model,build_year,engine_type,km_driven,car_price,county,timestamp) VALUES (?, ?, ?, ?, ?, ?, ?) ");
