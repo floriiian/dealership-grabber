@@ -37,57 +37,44 @@ public class Main {
 
             // LOGGER.debug(node.get("keyInfo"));
 
-            String[] carInfos  = String.valueOf(node.get("keyInfo")).split("[\\[\\]]")[1].split(",");
+            String[] carInfos = String.valueOf(node.get("keyInfo")).split("[\\[\\]]")[1].split(",");
 
             Integer buildYear = Integer.valueOf(carInfos[0].replaceAll("[\",]", ""));
             int carPrice = 0;
-            if ((!Objects.equals(String.valueOf(node.get("price")), "null"))){
+            if ((!Objects.equals(String.valueOf(node.get("price")), "null"))) {
                 carPrice = Integer.parseInt((String.valueOf(node.get("price")).replaceAll("[,\"]", "")));
             }
-            String engineType  = carInfos[1].replaceAll("[\",]", "");
+            String engineType = carInfos[1].replaceAll("[\",]", "");
             String carModel = String.valueOf(node.get("header"));
             String county = String.valueOf(node.get("county"));
 
             int kmDriven = 0;
             if (carInfos.length > 2) {
                 kmDriven = Integer.parseInt(carInfos[2].replaceAll("[,\"A-Za-z' ]", ""));
-            }
-            else {
+            } else {
                 kmDriven = Integer.parseInt(carInfos[1].replaceAll("[,\"A-Za-z' ]", ""));
             }
-            LOGGER.debug("buildYear {} engineType {} carModel : {} kmDriven: {} County: {} carPrice: {}", buildYear, engineType, carModel, kmDriven,county, carPrice);
-        }
+            LOGGER.debug("buildYear {} engineType {} carModel : {} kmDriven: {} County: {} carPrice: {}", buildYear, engineType, carModel, kmDriven, county, carPrice);
 
+            try {
+                PreparedStatement insert = connection.prepareStatement("INSERT INTO car_prices (car_name,car_price,timestamp) VALUES (?, ?, ?) ");
 
-        /*
+                insert.setString(1, carName);
+                insert.setLong(2, Long.parseLong(element.text().replaceAll("[£€,]", "")));
+                insert.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
 
-                Elements websiteElements = document.getAllElements();
+                insert.execute();
+                insert.close();
 
+                LOGGER.debug("Inserted {} for {}", element.text(), carName);
 
-        for (Element element : websiteElements) {
-            if (element.hasClass("Pricestyled__Text-sc-1dt81j8-5 hywplu")) {
-                if (!element.text().contains("p/m") && !element.text().contains("€0") && !element.text().equals("No Price")){
-                    try {
-                        PreparedStatement insert = connection.prepareStatement("INSERT INTO car_prices (car_name,car_price,timestamp) VALUES (?, ?, ?) ");
-
-                        insert.setString(1, carName);
-                        insert.setLong(2, Long.parseLong(element.text().replaceAll("[£€,]", "")));
-                        insert.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
-
-                        insert.execute();
-                        insert.close();
-
-                        LOGGER.debug("Inserted {} for {}", element.text(), carName);
-
-                    }catch(SQLException e){
-                        LOGGER.error(e);
-                    }
-                }
+            } catch (SQLException e) {
+                LOGGER.error(e);
             }
+            connection.close();
         }
-        connection.close();
-    */
     }
+
     public static Connection connectToDatabase(String username, String password){
 
         Connection connection = null;
@@ -115,8 +102,12 @@ public class Main {
                         "CREATE TABLE IF NOT EXISTS car_prices" +
                                 "(" +
                                 "id SERIAL NOT NULL PRIMARY KEY," +
-                                "car_name TEXT  NOT NULL," +
+                                "car_model TEXT  NOT NULL," +
+                                "build_year INT  NOT NULL," +
+                                "engine_type TEXT  NOT NULL," +
+                                "km_driven INT  NOT NULL," +
                                 "car_price BIGINT  NOT NULL," +
+                                "county STRING  NOT NULL," +
                                 "timestamp TIMESTAMP NOT NULL"
                                 + ")"
                 );
