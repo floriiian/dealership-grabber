@@ -1,15 +1,23 @@
 package de.florian.dealership;
 
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
 
+import java.io.File;
 import java.io.IOException;
 import java.sql.*;
+import java.util.Objects;
+
+import com.fasterxml.jackson.core.JsonParser.*;
+import org.jsoup.nodes.Node;
+import org.jsoup.select.Elements;
 
 public class Main {
 
@@ -21,7 +29,24 @@ public class Main {
 
         String carName = "Audi";
         Document document = Jsoup.connect("https://www.donedeal.ie/cars?make=" + carName).get();
-        Elements websiteElements = document.getAllElements();
+
+        String data = Objects.requireNonNull(document.getElementById("__NEXT_DATA__")).data();
+
+        // LOGGER.debug(document2);
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        JsonNode doc = objectMapper.readTree(data);
+        LOGGER.debug(doc);
+
+
+
+
+
+
+        /*
+
+                Elements websiteElements = document.getAllElements();
+
 
         for (Element element : websiteElements) {
             if (element.hasClass("Pricestyled__Text-sc-1dt81j8-5 hywplu")) {
@@ -45,6 +70,7 @@ public class Main {
             }
         }
         connection.close();
+    */
     }
     public static Connection connectToDatabase(String username, String password){
 
