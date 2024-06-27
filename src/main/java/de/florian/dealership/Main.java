@@ -19,7 +19,7 @@ public class Main {
 
     public static void main(String[] args) throws IOException, SQLException {
 
-        Connection connection = connectToDatabase("postgres", "Creeper008");
+        Connection connection = connectToDatabase("postgres", "yourpassword");
 
         String carName = "Ford";
         Document document = Jsoup.connect("https://www.donedeal.ie/cars?make=" + carName).get();
