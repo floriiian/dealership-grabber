@@ -40,39 +40,46 @@ public class Main {
             String[] carInfos = String.valueOf(node.get("keyInfo")).split("[\\[\\]]")[1].split(",");
 
             Integer buildYear = Integer.valueOf(carInfos[0].replaceAll("[\",]", ""));
-            int carPrice = 0;
-            if ((!Objects.equals(String.valueOf(node.get("price")), "null"))) {
-                carPrice = Integer.parseInt((String.valueOf(node.get("price")).replaceAll("[,\"]", "")));
+            long carPrice = Long.parseLong((String.valueOf(node.get("price")).replaceAll("[,\"]", "")));
+            if ((Objects.equals(String.valueOf(node.get("price")), "null"))) {
+                continue;
             }
             String engineType = carInfos[1].replaceAll("[\",]", "");
             String carModel = String.valueOf(node.get("header"));
             String county = String.valueOf(node.get("county"));
 
             int kmDriven = 0;
-            if (carInfos.length > 2) {
-                kmDriven = Integer.parseInt(carInfos[2].replaceAll("[,\"A-Za-z' ]", ""));
-            } else {
-                kmDriven = Integer.parseInt(carInfos[1].replaceAll("[,\"A-Za-z' ]", ""));
+
+            switch(carInfos.length){
+                case 4:
+                    kmDriven = Integer.parseInt(carInfos[2].replaceAll("[,\"A-Za-z' ]", ""));
+                case 3:
+                    kmDriven = Integer.parseInt(carInfos[2].replaceAll("[,\"A-Za-z' ]", ""));
+                case 2:
+                    kmDriven = Integer.parseInt(carInfos[1].replaceAll("[,\"A-Za-z' ]", ""));
             }
-            LOGGER.debug("buildYear {} engineType {} carModel : {} kmDriven: {} County: {} carPrice: {}", buildYear, engineType, carModel, kmDriven, county, carPrice);
+
+            LOGGER.info("Lenght: {} Var: {}", carInfos.length, kmDriven );
 
             try {
-                PreparedStatement insert = connection.prepareStatement("INSERT INTO car_prices (car_name,car_price,timestamp) VALUES (?, ?, ?) ");
-
-                insert.setString(1, carName);
-                insert.setLong(2, Long.parseLong(element.text().replaceAll("[£€,]", "")));
-                insert.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
+                PreparedStatement insert = connection.prepareStatement("INSERT INTO car_prices (car_model,build_year,engine_type,km_driven,car_price,county,timestamp) VALUES (?, ?, ?, ?, ?, ?, ?) ");
+                insert.setString(1, carModel);
+                insert.setInt(2, buildYear);
+                insert.setString(3, engineType);
+                insert.setInt(4, kmDriven);
+                insert.setLong(5, carPrice);
+                insert.setString(6, county);
+                insert.setTimestamp(7, new Timestamp(System.currentTimeMillis()));
 
                 insert.execute();
                 insert.close();
-
-                LOGGER.debug("Inserted {} for {}", element.text(), carName);
+                LOGGER.debug("Successfully inserted.");
 
             } catch (SQLException e) {
                 LOGGER.error(e);
             }
-            connection.close();
         }
+        connection.close();
     }
 
     public static Connection connectToDatabase(String username, String password){
@@ -107,7 +114,7 @@ public class Main {
                                 "engine_type TEXT  NOT NULL," +
                                 "km_driven INT  NOT NULL," +
                                 "car_price BIGINT  NOT NULL," +
-                                "county STRING  NOT NULL," +
+                                "county TEXT  NOT NULL," +
                                 "timestamp TIMESTAMP NOT NULL"
                                 + ")"
                 );
