@@ -47,15 +47,11 @@ public class Main {
             String carModel = String.valueOf(node.get("header"));
             String county = String.valueOf(node.get("county"));
 
-            int kmDriven = 0;
-            switch(carInfos.length){
-                case 4:
-                    kmDriven = Integer.parseInt((carInfos[2] + carInfos[3]).replaceAll("[,\"A-Za-z' ]", ""));
-                    break;
-                case 3:
-                    kmDriven = Integer.parseInt(carInfos[2].replaceAll("[,\"A-Za-z' ]", ""));
-                    break;
-            }
+            int kmDriven = switch (carInfos.length) {
+                case 4 -> Integer.parseInt((carInfos[2] + carInfos[3]).replaceAll("[,\"A-Za-z' ]", ""));
+                case 3 -> Integer.parseInt(carInfos[2].replaceAll("[,\"A-Za-z' ]", ""));
+                default -> 0;
+            };
 
             try {
                 PreparedStatement insert = connection.prepareStatement("INSERT INTO car_prices (car_model,build_year,engine_type,km_driven,car_price,county,timestamp) VALUES (?, ?, ?, ?, ?, ?, ?) ");
