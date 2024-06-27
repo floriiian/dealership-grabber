@@ -21,6 +21,6 @@ Connection connection = prepareDatabase("postgres", "yourpassword");
 ```java
  String carName = "Ford";
 ````
-- Now start the program and let's see if it works, you should now see your data flowing
+- Now run the program and let's see if it works, you should now see your data flowing
   into your database.
 
