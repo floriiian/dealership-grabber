@@ -2,6 +2,7 @@ package de.florian.dealership;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -33,13 +34,11 @@ public class Main {
         Iterator<JsonNode> ads  = doc.get("props").get("pageProps").get("ads").elements();
 
         while (ads.hasNext()) {
+
             JsonNode node = ads.next();
-
-            // LOGGER.debug(node.get("keyInfo"));
-
             String[] carInfos = String.valueOf(node.get("keyInfo")).split("[\\[\\]]")[1].split(",");
 
-            Integer buildYear = Integer.valueOf(carInfos[0].replaceAll("[\",]", ""));
+            int buildYear = Integer.parseInt((carInfos[0].replaceAll("[\",]", "")));
             long carPrice = Long.parseLong((String.valueOf(node.get("price")).replaceAll("[,\"]", "")));
             if ((Objects.equals(String.valueOf(node.get("price")), "null"))) {
                 continue;
@@ -49,14 +48,13 @@ public class Main {
             String county = String.valueOf(node.get("county"));
 
             int kmDriven = 0;
-
             switch(carInfos.length){
                 case 4:
                     kmDriven = Integer.parseInt((carInfos[2] + carInfos[3]).replaceAll("[,\"A-Za-z' ]", ""));
+                    break;
                 case 3:
                     kmDriven = Integer.parseInt(carInfos[2].replaceAll("[,\"A-Za-z' ]", ""));
-                case 2:
-                    kmDriven = Integer.parseInt(carInfos[2].replaceAll("[,\"A-Za-z' ]", ""));
+                    break;
             }
 
             try {
@@ -99,7 +97,6 @@ public class Main {
             }
 
             connection = DriverManager.getConnection("jdbc:postgresql://localhost:5432/dealership_prices", username, password);
-            connection.setAutoCommit(false);
 
             try (Statement statement = connection.createStatement())
             {
