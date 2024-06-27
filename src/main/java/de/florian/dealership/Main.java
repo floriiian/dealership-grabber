@@ -1,6 +1,5 @@
 package de.florian.dealership;
 
-import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.logging.log4j.LogManager;
@@ -8,16 +7,11 @@ import org.apache.logging.log4j.Logger;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
 
-import java.io.File;
 import java.io.IOException;
 import java.sql.*;
+import java.util.Iterator;
 import java.util.Objects;
-
-import com.fasterxml.jackson.core.JsonParser.*;
-import org.jsoup.nodes.Node;
-import org.jsoup.select.Elements;
 
 public class Main {
 
@@ -36,11 +30,33 @@ public class Main {
         ObjectMapper objectMapper = new ObjectMapper();
 
         JsonNode doc = objectMapper.readTree(data);
-        LOGGER.debug(doc);
+        Iterator<JsonNode> ads  = doc.get("props").get("pageProps").get("ads").elements();
 
+        while (ads.hasNext()) {
+            JsonNode node = ads.next();
 
+            // LOGGER.debug(node.get("keyInfo"));
 
+            String[] carInfos  = String.valueOf(node.get("keyInfo")).split("[\\[\\]]")[1].split(",");
 
+            Integer buildYear = Integer.valueOf(carInfos[0].replaceAll("[\",]", ""));
+            int carPrice = 0;
+            if ((!Objects.equals(String.valueOf(node.get("price")), "null"))){
+                carPrice = Integer.parseInt((String.valueOf(node.get("price")).replaceAll("[,\"]", "")));
+            }
+            String engineType  = carInfos[1].replaceAll("[\",]", "");
+            String carModel = String.valueOf(node.get("header"));
+            String county = String.valueOf(node.get("county"));
+
+            int kmDriven = 0;
+            if (carInfos.length > 2) {
+                kmDriven = Integer.parseInt(carInfos[2].replaceAll("[,\"A-Za-z' ]", ""));
+            }
+            else {
+                kmDriven = Integer.parseInt(carInfos[1].replaceAll("[,\"A-Za-z' ]", ""));
+            }
+            LOGGER.debug("buildYear {} engineType {} carModel : {} kmDriven: {} County: {} carPrice: {}", buildYear, engineType, carModel, kmDriven,county, carPrice);
+        }
 
 
         /*
